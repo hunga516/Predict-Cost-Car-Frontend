@@ -1,90 +1,29 @@
-import images from "../assets/images"
-import { FaHeart, FaCommentDots, FaBookmark, FaShare } from "react-icons/fa";
-import { FaCirclePlus } from "react-icons/fa6";
-import video from "../assets/video";
-import Skeleton from "react-loading-skeleton";
-import { useContext } from "react";
-import { loadingContext } from "../App";
-import { LoadingContext } from "../context";
+import { load } from '@tensorflow-models/qna';
+import * as tf from '@tensorflow/tfjs';
+import { useEffect } from 'react';
 
 function HomePage() {
+    const answers = async () => {
+        // Khởi tạo backend
+        await tf.setBackend('webgl'); // Hoặc dùng 'cpu' nếu gặp vấn đề với 'webgl'
+        await tf.ready(); // Đảm bảo backend đã sẵn sàng
 
-    const LoadingContextValue = useContext(LoadingContext)
+        const question = "who are you?";
+        const passage = "Hello, my name is Le Ngoc Loc. I am currently a student majoring in Information Technology, specializing in web programming and web application development with technologies like React, MongoDB, JavaScript, Next.js, HTML, and CSS. I am passionate about learning and improving my skills in programming, constantly working to develop high-quality products that enhance user experience. In addition, I’m eager to explore new technologies and work on exciting projects where I can apply my knowledge in real-world situations and contribute to the programming community.";
 
-    const ACTION_ITEMS = [
-        {
-            icon: FaHeart,
-            title: '',
-            data: {
-                count: 555.6
-            }
-        },
-        {
-            icon: FaCommentDots,
-            title: '',
-            data: {
-                count: 33.2
-            }
-        },
-        {
-            icon: FaBookmark,
-            title: '',
-            data: {
-                count: 500
-            }
-        },
-        {
-            icon: FaShare,
-            title: '',
-            data: {
-                count: 1237
-            }
-        }
-    ]
+        // Tải mô hình và tìm câu trả lời
+        const model = await load();
+        const answers = await model.findAnswers(question, passage);
 
-    const VIDEO_ITEMS = Object.values(video)
+        console.log('Answers: ');
+        console.log(answers);
+    }
 
     return (
         <>
-            {VIDEO_ITEMS.map(item => (
-                <div className="wrapper flex w-[692px] mt-[20px] pb-[25px] mx-auto border-b-[1px]">
-                    <div className="video w-[435px] mr-[20px]">
-                        {LoadingContextValue ? (
-                            <Skeleton className="rounded-3xl" height={841} />
-                        ) : (
-                            <video className="rounded-3xl" src={item} controls type="video/mp4"></video>
-                        )}
-                    </div>
-                    <div className="social-interaction flex flex-col items-center justify-end ">
-                        <div className="avatar relative mb-[16px]">
-                            {LoadingContextValue ? (
-                                <Skeleton height={48} width={48} />
-                            ) : (
-                                <img className=" h-[48px] w-[48px] rounded-full" src={images.sony} />
-                            )}
-                            <FaCirclePlus className="absolute bottom-[-15%] translate-x-[50%] text-[#EA284E] text-[24px]" />
-                        </div>
-                        {ACTION_ITEMS.map((item, index) => (
-                            <>
-                                <button className="love-react flex text-[#000] my-[8px] justify-center items-center rounded-full h-[48px] w-[48px] bg-slate-300 text-[21px]">
-                                    {LoadingContextValue ? (
-                                        <Skeleton />
-                                    ) : (
-                                        <item.icon />
-                                    )}
-                                </button>
-                                <span className="text-[14px] font-semibold leading-[21px]">
-                                    {!LoadingContextValue && (
-                                        <>{item.data.count}K</>
-                                    )}
-                                </span>
-                            </>
-                        ))}
-                    </div>
-                </div>
-            ))}
+            <button className="text-red-500" onClick={answers}>Button</button>
         </>
     )
 }
 
-export default HomePage
+export default HomePage;
